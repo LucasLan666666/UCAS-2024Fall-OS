@@ -1,0 +1,16 @@
+\section{题目}
+
+{\tt Linux}下常见的3种系统调用方法包括：
+
+\begin{enumerate}
+    \item 通过{\tt glibc}提供的库函数调用
+    \item 使用{\tt syscall}函数直接调用相应的系统调用
+    \item 通过{\tt int 80}指令（32位系统）或者{\tt syscall}指令（64位系统）的内联汇编调用
+\end{enumerate}
+
+请研究{\tt Linux}(kernel>=2.6.24) {\tt getpid}和{\tt open}这两个系统调用的用法，分别使用上述3种系统调用方法来执行。要求：
+
+\begin{enumerate}
+    \item 针对同一个系统调用，记录和对比3种方法的运行时间，并尝试解释时间差异的原因。
+    \item 对比{\tt getpid}和{\tt open}这两个系统调用在使用内联汇编实现调用时的运行时间，如果有差异，尝试解释差异原因。若无差异，说明即可。
+\end{enumerate}

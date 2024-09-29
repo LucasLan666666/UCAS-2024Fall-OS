@@ -1,0 +1,179 @@
+\section{作业}
+
+\subsection{
+    一个C程序可以编译成目标文件或可执行文件。目标文件和可执行文件通常包含{\tt text}、{\tt data}、{\tt bss}、{\tt rodata}段，程序执行时也会用到堆（{\tt heap}）和栈（{\tt stack}）
+}
+
+\subsubsection{
+    请写一个C程序，使其包含{\tt data}段和{\tt bss}段，并在运行时包含堆的使用。请说明所写程序中哪些变量在{\tt data}段、{\tt bss}段和堆上
+}
+
+\noindent
+我写的程序如下：
+
+\lstinputlisting[language=C, caption={prog1.c}]{code/prog1.c}
+
+\noindent
+变量的位置如下：
+
+\begin{tabular}{|c|c|c|}
+    \hline
+    变量 & 所在位置 & 原因 \\
+    \hline
+    {\tt a} & {\tt data}段 & 初始化的全局变量 \\
+    \hline
+    {\tt b} & {\tt bss}段 & 未初始化的全局变量 \\
+    \hline
+    {\tt c} & {\tt data}段 & 静态变量 \\
+    \hline
+    {\tt *p} & 堆上 & 通过{\tt malloc}函数分配得到 \\
+    \hline
+\end{tabular}
+
+\subsubsection{
+    请了解{\tt readelf}、{\tt objdump}命令的使用，用这些命令查看（1）中所写程序的{\tt data}和{\tt bss}段，截图展示
+}
+
+\noindent
+如下图所示，可以看到{\tt data}段和{\tt bss}段的内容:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{fig/data_bss.png}
+    \caption{{\tt data}和{\tt bss}段}
+\end{figure}
+
+\noindent
+{\tt data}段的$0$和$1$刚好对应{\tt a}和{\tt c}的值，{\tt bss}段对应{\tt b}的值，符合预期。
+
+\subsubsection{
+    请说明（1）中所写程序是否用到了栈
+}
+
+\noindent
+用到了栈，理由如下：
+
+一方面，{\tt p}是一个局部变量，它的地址是在栈上分配的；另一方面，调用函数{\tt malloc()}的过程需要将返回地址压栈。
+
+\subsection{
+    {\tt fork}、{\tt exec}、{\tt wait}等是进程操作的常用API，请调研了解这些API的使用方法
+}
+
+\subsubsection{
+    请写一个{\tt C}程序，该程序首先创建一个$1$到$10$的整数数组，然后创建一个子进程，并让子进程对前述数组所有元素求和，并打印求和结果。等子进程完成求和后，父进程打印{\tt "parentprocess finishes"},再退出
+}
+
+\noindent
+我写的程序如下：
+
+\lstinputlisting[language=C, caption={prog2.c}]{code/prog2.c}
+
+\subsubsection{
+    在（1）所写的程序基础上，当子进程完成数组求和后，让其执行{\tt ls -l}命令(注：该命令用于显示某个目录下文件和子目录的详细信息)，显示你运行程序所用操作系统的某个目录详情。例如，让子进程执行{\tt ls -l /usr/bin}目录，显示{\tt /usr/bin}目录下的详情。父进程仍然需要等待子进程执行完后打印{\tt "parentprocess finishes"},再退出
+}
+
+\noindent
+修改后的程序如下：
+
+\lstinputlisting[language=C, caption={prog3.c}]{code/prog3.c}
+
+\noindent
+运行结果如下：
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{fig/ls.png}
+    \caption{运行结果}
+\end{figure}
+
+\subsubsection{
+    请阅读XV6代码（https://pdos.csail.mit.edu/6.828/2024/xv6.html），找出XV6代码中对进程控制块（{\tt PCB}）的定义代码，说明其所在的文件，以及当{\tt fork}执行时，对{\tt PCB}做了哪些操作？
+}
+
+\noindent
+{\tt PCB}的定义在{\tt kernel/proc.h}文件中，如下所示：
+
+\begin{lstlisting}[language=C, caption={{\tt PCB}定义}]
+
+    // Per-process state
+    struct proc {
+      struct spinlock lock;
+
+      // p->lock must be held when using these:
+      enum procstate state;        // Process state
+      void *chan;                  // If non-zero, sleeping on chan
+      int killed;                  // If non-zero, have been killed
+      int xstate;                  // Exit status to be returned to parent's wait
+      int pid;                     // Process ID
+
+      // wait_lock must be held when using this:
+      struct proc *parent;         // Parent process
+
+      // these are private to the process, so p->lock need not be held.
+      uint64 kstack;               // Virtual address of kernel stack
+      uint64 sz;                   // Size of process memory (bytes)
+      pagetable_t pagetable;       // User page table
+      struct trapframe *trapframe; // data page for trampoline.S
+      struct context context;      // swtch() here to run process
+      struct file *ofile[NOFILE];  // Open files
+      struct inode *cwd;           // Current directory
+      char name[16];               // Process name (debugging)
+    };
+
+\end{lstlisting}
+
+\noindent
+当{\tt fork}执行时，对{\tt PCB}做了如下操作：
+
+\begin{enumerate}
+    \item 首先，定义变量{\tt p}和{\tt np}，分别是指向父进程和子进程结构体的指针；
+    \item 通过{\tt allocproc()}函数分配一个新的进程结构体，即子进程；
+    \item 调用{\tt uvmcopy()}函数将父进程的内存信息复制给子进程；
+    \item 将父进程的用户寄存器复制给子进程；
+    \item 将子进程的返回值设置为{\tt 0}；
+    \item 用{\tt filedup()}函数将父进程的文件描述符复制给子进程；
+    \item 用{\tt idup}函数将父进程的工作目录复制给子进程；
+    \item 用{\tt safestrcpy()}复制进程名称；
+    \item 释放子进程锁，设置子进程的父进程，设置子进程状态为可运行；
+    \item 最后返回子进程的{\tt pid}。
+\end{enumerate}
+
+\subsection{
+    请阅读以下程序代码，回答下列问题
+}
+
+\lstinputlisting[language=C, caption={程序代码}]{code/example.c}
+
+\subsubsection{
+    该程序一共会生成几个子进程？请你画出生成的进程之间的关系（即谁是父进程谁是子进程），并对进程关系进行适当说明
+}
+
+\noindent
+该程序一共生成了$3$个子进程。进程关系如下：
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{fig/fork.png}
+    \caption{进程关系}
+\end{figure}
+
+\noindent
+说明：
+
+\begin{enumerate}
+    \item 设初始进程为{\tt p0}，{\tt p0}在进行第一次{\tt fork()}系统调用后创造了子进程{\tt p1}。
+    \item {\tt p0}休眠$5$秒；{\tt p1}在终端打印信息，{\tt loop}增加到$1$，同时立刻进行{\tt fork()}系统调用，创造子进程{\tt p2}。
+    \item {\tt p2}在终端打印信息，{\tt loop}增加到$2$，结束循环，终止。
+    \item {\tt p0}第一次休眠结束，{\tt loop}增加到$1$，进行{\tt fork()}系统调用后创建子进程{\tt p3}，同时开始第二次休眠；{\tt p3}在终端打印信息后{\tt loop}增加到$2$，结束循环，终止。
+    \item {\tt p1}休眠结束，{\tt loop}增加到$2$，结束循环，终止。
+    \item {\tt p0}第二次休眠结束，{\tt loop}增加到$2$，结束循环，终止。
+\end{enumerate}
+
+\subsubsection{
+    如果生成的子进程数量和宏定义{\tt LOOP}不符，在不改变{\tt for}循环的前提下，你能用少量代码修改，使该程序生成{\tt LOOP}个子进程么？
+}
+
+\noindent
+有，我的方法是让父进程在创建完子进程后立刻终止，修改后代码如下：
+
+\lstinputlisting[language=C, caption={程序代码}]{code/example_mod.c}

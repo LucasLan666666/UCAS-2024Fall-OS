@@ -1,0 +1,32 @@
+\section{测试}
+
+下面分别展示两个系统调用在不同情况下的测试方法。
+
+\subsection{{\tt getpid}}
+
+\subsubsection{测试代码}
+
+\lstinputlisting[language=C, caption={{\tt getpid.c}}]{code/getpid.c}
+
+\subsubsection{说明}
+
+这个测试代码中，我设计了{\tt measure\_glibc} 、 {\tt measure\_syscall}和{\tt measure\_syscall\_inline\_asm}三个函数，分别用于测量{\tt getpid}系统调用的时间：
+
+\begin{enumerate}
+    \item {\tt measure\_glibc}使用了{\tt glibc}的{\tt getpid}函数；
+    \item {\tt measure\_syscall}使用了{\tt syscall}函数；
+    \item {\tt measure\_syscall\_inline\_asm}以内联汇编的方式使用了x86\_64的{\tt syscall}指令。
+\end{enumerate}
+
+上述测试分别进行一次，以ns为单位输出测试结果。
+
+
+\subsection{{\tt open}}
+
+\subsubsection{测试代码}
+
+\lstinputlisting[language=C, caption={{\tt open.c}}]{code/open.c}
+
+\subsubsection{说明}
+
+与{\tt getpid}测试类似，不再赘述。
