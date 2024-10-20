@@ -1,0 +1,69 @@
+\question {
+    在生产者——消费者问题中，假设缓冲区大小为$5$，生产者和消费者在写入和读取数据时都会更新写入/读取的位置{\tt offset}。现有以下两种基于信号量的实现方法
+}
+
+方法一：
+
+\begin{lstlisting}[language=C++]
+Class BoundedBuffer {
+    mutex = new Semaphore(1);
+    fullBuffers = new Semaphore(0);
+    emptyBuffers = new Semaphore(n);
+}
+BoundedBuffer::Deposit(c) {
+    emptyBuffers->P();
+    mutex->P();
+    Add c to the buffer;
+    offset++;
+    mutex->V();
+    fullBuffers->V();
+}
+BoundedBuffer::Remove(c) {
+    fullBuffers->P();
+    mutex->P();
+    Remove c from buffer;
+    offset--;
+    mutex->V();
+    emptyBuffers->V();
+}
+\end{lstlisting}
+
+方法二：
+
+\begin{lstlisting}[language=C++]
+Class BoundedBuffer {
+    mutex = new Semaphore(1);
+    fullBuffers = new Semaphore(0);
+    emptyBuffers = new Semaphore(n);
+}
+BoundedBuffer::Deposit(c) {
+    mutex->P();
+    emptyBuffers->P();
+    Add c to the buffer;
+    offset++;
+    fullBuffers->V();
+    mutex->V();
+}
+BoundedBuffer::Remove(c) {
+    mutex->P();
+    fullBuffers->P();
+    Remove c from buffer;
+    offset--;
+    emptyBuffers->V();
+    mutex->V();
+}
+\end{lstlisting}
+
+请对比分析上述方法一和方法二，哪种方法能让生产者、消费者进程正常运行，并说明分析原因。
+
+\begin{solution}
+
+方法一能让生产者、消费者进程正常运行，而方法二不能。理由如下：
+
+方法一和方法二的唯一区别就是在对{\tt BoundedBuffer}进行{\tt Deposit()}和{\tt Remove()}操作时，获取和释放互斥锁的位置不同，换言之，临界区不一样。
+
+在方法二中，生产者和消费者操作的互斥锁包含了整个操作过程。假如生产者在进行{\tt Deposit()}操作时并获取了互斥锁之后，缓冲区已满，那么生产者会被阻塞在{\tt emptyBuffers->P()}处，进而无法完成对互斥锁的释放，导致消费者也无法进行{\tt Remove()}操作，从而产生死锁。而方法一中，生产者和消费者操作的互斥锁只包含了对缓冲区的操作，因此生产者在进行{\tt Deposit()}操作时，即使被阻塞在{\tt emptyBuffers->P()}处，也不会影响消费者进行{\tt Remove()}操作，从而避免了死锁的发生。
+
+如果消费者在进行{\tt Remove()}操作时发现缓冲区为空，也会出现类似问题，不再赘述。
+
+\end{solution}

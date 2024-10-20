@@ -1,0 +1,36 @@
+\question {
+    银行有$n$个柜员，每个顾客进入银行后先取一个号，并且等着叫号，当一个柜员空闲后，就叫下一个号。
+}
+
+请使用$PV$操作分别实现：
+
+\begin{parts}
+    \part 顾客取号操作 $Customer\_Service$
+    \part 柜员服务操作 $Teller\_Service$
+\end{parts}
+
+\begin{solution}
+
+如下所示：
+
+\begin{lstlisting}[language=C]
+Semaphore mutex = 1, customers = 0, emptyTellers = n, fullTellers = 0;
+Teller_Service() {
+    P(emptyTellers);
+    P(customers);
+    P(mutex);
+    // 这里空闲柜员叫了一个顾客并进行服务
+    V(mutex);
+    V(fullTellers);
+}
+Customer_Service() {
+    P(fullTellers);
+    P(mutex);
+    // 顾客取号
+    V(mutex);
+    V(customers);
+    V(emptyTellers);
+}
+\end{lstlisting}
+
+\end{solution}

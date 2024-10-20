@@ -1,0 +1,163 @@
+\question {
+    设有两个优先级相同的进程$T1$，$T2$如下。令信号量$S1$，$S2$的初值为$0$，已知$z=2$，试问$T1$，$T2$并发运行结束后$x=?y=?z=?$
+}
+
+\begin{lstlisting}
+// T1
+    y := 1;
+    y := y + 2;
+    V(S1);
+    z := y + 1;
+    P(S2);
+    y := z + y;
+
+// T2
+    x := 1;
+    x := x + 1;
+    P(S1);
+    x := x + y;
+    V(S2);
+    z := x + z;
+\end{lstlisting}
+
+注：请分析所有可能的情况，并给出结果与相应执行顺序。
+
+\begin{solution}
+
+为了方便分析，我以$V()$和$P()$操作为界限，将$T1$和$T2$的代码分为了$6$个部分，分别为$A_1$，$A_2$，$A_3$和$B_1$，$B_2$，$B_3$。其对应的操作如下：
+
+$$
+\begin{aligned}
+    A_1 \quad y & := 1; \\
+              y & := y + 2; \\
+    A_2 \quad z & := y + 1; \\
+    A_3 \quad y & := z + y; \\
+    B_1 \quad x & := 1; \\
+              x & := x + 1; \\
+    B_2 \quad x & := x + y; \\
+    B_3 \quad z & := x + z;
+\end{aligned}
+$$
+
+
+当二者并发运行时，首先因为内存一致性，以下的执行顺序得到保证：
+
+$$
+A_1 \to A_2 \to A_3
+$$
+$$
+B_1 \to B_2 \to B_3
+$$
+
+又因为信号量的作用，并且$S1$和$S2$的初值为$0$，所以又有如下限制：
+
+$$
+A_1 \to B_2 \to A_3
+$$
+
+对此，可以将所有情况分为以下五大类。
+
+\begin{parts}
+
+\part
+第一种情况如下所示：
+
+$$
+\left.
+\begin{array}{l}
+    A_1 \to A_2 \\
+    B_1
+\end{array}
+\right\}
+\to
+B_2 \to A_3 \to B_3
+$$
+
+因为$A_1 \to A_2$与$B_1$没有访问到共享变量，所以不会产生竞争条件，所以二者并发运行的各种情况不会造成影响。最终的结果为：
+
+$$
+x = 5, y = 7, z = 9
+$$
+
+\part
+第二种情况如下所示：
+
+$$
+\left.
+\begin{array}{l}
+    A_1 \to A_2 \\
+    B_1
+\end{array}
+\right\}
+\to
+B_2 \to B_3 \to A_3
+$$
+
+与上一种情况类似，最终的结果为：
+
+$$
+x = 5, y = 12, z = 9
+$$
+
+\part
+第三种情况如下所示：
+
+$$
+\left.
+\begin{array}{l}
+    A_1 \\
+    B_1
+\end{array}
+\right\}
+\to
+B_2 \to A_2 \to B_3 \to A_3
+$$
+
+最终的结果为：
+
+$$
+x = 5, y = 12, z = 9
+$$
+
+\part
+第四种情况如下所示：
+
+$$
+\left.
+\begin{array}{l}
+    A_1 \\
+    B_1
+\end{array}
+\right\}
+\to
+B_2  \to B_3 \to A_2\to A_3
+$$
+
+最终的结果为：
+
+$$
+x = 5, y = 7, z = 4
+$$
+
+\part
+第五种情况如下所示：
+
+$$
+\left.
+\begin{array}{l}
+    A_1 \\
+    B_1
+\end{array}
+\right\}
+\to
+B_2  \to B_3 \to A_2\to A_3
+$$
+
+最终的结果为：
+
+$$
+x = 5, y = 7, z = 9
+$$
+
+\end{parts}
+\end{solution}
