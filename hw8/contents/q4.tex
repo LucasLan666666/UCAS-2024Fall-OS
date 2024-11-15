@@ -1,0 +1,51 @@
+\question {
+    有如下 C 程序：
+}
+
+\begin{lstlisting}[language=C]
+uint32 X[N];
+
+int step = M, i = 0;
+
+for (i=0; i<N; i+=step)
+    X[i] = X[i] + 1;
+\end{lstlisting}
+
+\begin{parts}
+    \part {
+        假设该程序运行在一台计算机上，该计算机的虚址空间为 32-bit，物理地址空间为 2 GB，页大
+        小为4 KB，如果采用一级页表，则该页表的页表项一共有多少？
+    }
+
+    \part {
+        假设该计算机的 CPU 的 TLB 大小为 32 项，每项 4B，那么题述程序中的 M 和 N 取值为多少
+        时，会使得程序中循环的每一次执行都会触发 TLB miss？（假设 TLB 初始为空）
+    }
+
+    \part {
+        上一小问中，M 和 N 取值多少时，会使得程序中的循环执行时 TLB hit 最多？（假设 TLB
+        初始为空）
+    }
+\end{parts}
+
+\begin{solution}
+
+\begin{parts}
+
+\part
+页表项数目为
+$$
+\frac{2^{32}}{2^{12}} = 2^{20} = 1 \text{ M}
+$$
+
+\part
+如果要每一次都触发 TLB miss，那么每次循环都要访问一个新的页，即 $i$ 的增量 $M$ 不能小于一个页
+的大小，即 $M \geq 2^{12}$。$N$为正整数即可，$N \geq 0$。
+
+\part
+如果 TLB hit 最多，只需要刚好用完 TLB 中的所有项，所以一共访问 $32$ 个页。步长为 $1$ 即可，
+这样每一页只会发生一次 TLB miss，所以 $M = 1$，$N = \frac{4096}{32} \times 32 = 4096$。
+（好像可以取$M = 0$，有点耍赖了）
+\end{parts}
+
+\end{solution}
