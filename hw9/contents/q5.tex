@@ -1,0 +1,19 @@
+\question {
+    现有一个内存空间分配器，采用伙伴算法。假设物理内存总共 64 KB。
+}
+
+\begin{parts}
+    \part 请给出第一级的一对伙伴块的起始地址
+    \part 请给出第二级的二对伙伴块的起始地址
+    \part 地址{\tt 0xa700}，已知它位于第 7 级伙伴块中，请问该块的伙伴块的起始地址
+\end{parts}
+
+\begin{solution}
+
+\begin{parts}
+    \part {\tt 0x0000} 和 {\tt 0x8000}
+    \part {\tt 0x0000} 和 {\tt 0x4000}，{\tt 0x8000} 和 {\tt 0xc000}
+    \part  该块的起始地址是{\tt 0xa600}，伙伴块的起始地址是{\tt 0xa400}
+\end{parts}
+
+\end{solution}
