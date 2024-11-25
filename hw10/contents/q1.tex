@@ -1,0 +1,79 @@
+\question {
+    现有一块磁盘，扇区大小为 512B，假设其平均寻道时间是 4ms，旋转速率是 15000 RPM
+    （每分钟15000转），传输带宽是 200MB/s，请计算：
+}
+
+\begin{parts}
+    \part {
+        当某一用户程序分别从磁盘上的一个文件中读取 256B，2KB，1MB 的数据时，这三种情况下的
+        有效带宽各是多少？（注意：用户程序发送的文件数据读写请求经过文件系统处理后，发往磁盘
+        的最小请求粒度是 4KB。计算有效带宽时不考虑软件层的时间开销）
+    }
+    \part {
+        如果希望该用户程序读写该磁盘的有效带宽达到 180MB/s，则该程序的读写粒度应为多大？
+    }
+\end{parts}
+
+\begin{solution}
+\begin{parts}
+
+\part
+
+平均寻道时间题目已经给出：
+$$
+T_{\text{seek}} = 4 \text{ms}
+$$
+
+因为旋转速率是$15000 \text{RPM}$，所以每秒转数是$15000 / 60 = 250 \text{RPS}$，
+则每转的时间是$1 / 250 = 4 \text{ms}$，所以平均旋转时间是
+$$
+T_{\text{rotation}} = 4 \text{ms} / 2 = 2 \text{ms}
+$$
+
+因为最小请求粒度是$4 \text{KB}$，所以$256 \text{B}$和$2 \text{KB}$都会向磁盘发出
+$4 \text{KB}$的请求，而$1 \text{MB}$会向磁盘发出$1 \text{MB}$的请求。因此，可以
+计算出三种情况下传输时间：
+$$
+\begin{aligned}
+    T_{\text{transfer\_1}} &= \frac{4 \text{KB}}{200 \text{MB/s}} = 20 \mu s \\
+    T_{\text{transfer\_2}} &= \frac{4 \text{KB}}{200 \text{MB/s}} = 20 \mu s \\
+    T_{\text{transfer\_3}} &= \frac{1 \text{MB}}{200 \text{MB/s}} = 5 \text{ms}
+\end{aligned}
+$$
+
+所以，三种情况下的总时间分别是：
+$$
+\begin{aligned}
+    T_{\text{I/O\_1}} &= 4 \text{ms} + 2 \text{ms} + 20 \mu s = 6.02 \text{ms} \\
+    T_{\text{I/O\_2}} &= 4 \text{ms} + 2 \text{ms} + 20 \mu s = 6.02 \text{ms} \\
+    T_{\text{I/O\_3}} &= 4 \text{ms} + 2 \text{ms} + 5 \text{ms} = 11 \text{ms}
+\end{aligned}
+$$
+
+可以得出三种情况下的有效带宽：
+$$
+\begin{aligned}
+    R_{\text{I/O\_1}} &= \frac{256 \text{B}}{6.02 \text{ms}} = 0.0426 \text{MB/s} \\
+    R_{\text{I/O\_2}} &= \frac{2 \text{KB}}{6.02 \text{ms}} = 0.335 \text{MB/s} \\
+    R_{\text{I/O\_3}} &= \frac{1 \text{MB}}{11 \text{ms}} = 90.9 \text{MB/s}
+\end{aligned}
+$$
+
+
+\part
+由上一小问的计算结果可知，当用户程序的读写粒度为$1 \text{MB}$时，其有效带宽为
+$90.9 \text{MB/s}$。所以读写粒度应该不小于$1 \text{MB}$。设读写粒度为$X \text{MB}$，
+则有：
+$$
+    R_{\text{I/O}} = \frac{X \text{MB}}{T_{\text{seek}} + T_{\text{rotation}} + \frac{X \text{MB}}{200 \text{MB/s}}}
+$$
+
+代入$R_{\text{I/O}} = 180 \text{MB/s}$，解方程得：
+$$
+X = 10.8 \text{MB}
+$$
+
+所以，用户程序的读写粒度应该不小于$10.8 \text{MB}$。
+
+\end{parts}
+\end{solution}

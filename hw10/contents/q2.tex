@@ -1,0 +1,60 @@
+\question {
+    现有一块磁盘，假设其磁头当前位于第 103 磁道，正在向磁道序号增加的方向移动。现有一个磁盘
+    访问请求序列，其访问的磁道号依次为33，50，8，69，110，150，173，202，请计算：
+}
+
+\begin{parts}
+    \part {
+        当分别采用 FIFO、SSF 和 C-SCAN 三种磁盘调度算法执行上述磁盘请求序列时，三种情况
+        下的寻道距离各是多少？
+    }
+\end{parts}
+
+\begin{solution}
+
+对于 FIFO 算法，磁头按照请求的顺序进行访问，所以服务顺序是：
+$$
+    103 \rightarrow 33 \rightarrow 50 \rightarrow 8 \rightarrow 69
+    \rightarrow 110 \rightarrow 150 \rightarrow 173 \rightarrow 202
+$$
+因此寻道距离是：
+$$
+\begin{aligned}
+    D_{\text{FIFO}} &= |103 - 33| + |33 - 50| + |50 - 8| + |8 - 69| + |69 - 110|
+                       + |110 - 150| + |150 - 173| + |173 - 202| \\
+                    &= 70 + 17 + 42 + 61 + 41 + 40 + 23 + 29 \\
+                    &= 323
+\end{aligned}
+$$
+
+对于 SSF 算法，磁头按照离当前磁道最近的磁道进行访问，所以服务顺序是：
+$$
+    103 \rightarrow 110 \rightarrow 150 \rightarrow 173 \rightarrow 202
+    \rightarrow 69 \rightarrow 50 \rightarrow 33 \rightarrow 8
+$$
+因此寻道距离是：
+$$
+\begin{aligned}
+    D_{\text{SSF}} &= |103 - 110| + |110 - 150| + |150 - 173| + |173 - 202|
+                     + |202 - 69| + |69 - 50| + |50 - 33| + |33 - 8| \\
+                  &= 7 + 40 + 23 + 29 + 133 + 19 + 17 + 25 \\
+                  &= 293
+\end{aligned}
+$$
+
+对于 C-SCAN 算法，假定磁头向磁道序号增加的方向移动，那么服务顺序是：
+$$
+    103 \rightarrow 110 \rightarrow 150 \rightarrow 173 \rightarrow 202
+    \rightarrow 8 \rightarrow 33 \rightarrow 50 \rightarrow 69
+$$
+因此寻道距离是：
+$$
+\begin{aligned}
+    D_{\text{C-SCAN}} &= |103 - 110| + |110 - 150| + |150 - 173| + |173 - 202|
+                        + |202 - 8| + |8 - 33| + |33 - 50| + |50 - 69| \\
+                     &= 7 + 40 + 23 + 29 + 194 + 25 + 17 + 19 \\
+                     &= 354
+\end{aligned}
+$$
+
+\end{solution}
