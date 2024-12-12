@@ -1,0 +1,38 @@
+\question {
+    现有一块 SSD，每个擦除块有 128 页，且它读一页的延迟是 25 微秒，写一页的延迟是 80 微秒，
+    擦除一块的时间是 2 毫秒。如果该 SSD 的 FTL 采用混合映射，分下面 3 种情况，计算回收一个
+    块需要的时间。
+}
+
+\begin{parts}
+    \part Switch merge
+    \part Partial merge 且假设块中有效页为 40\%
+    \part Full merge
+\end{parts}
+
+\begin{solution}
+
+\begin{parts}
+
+\part
+Switch merge 情况下，回收需要擦除一个块一次：
+$$
+    T_1 = 2 \text{ms}
+$$
+
+\part
+Partial merge 且假设块中有效页为 40\% 时，需要先拷贝有效页（拷贝时读写各一次），再加上擦除
+需要的一次：
+$$
+    T_2 = 128 \times 40\% \times (0.025 + 0.080) + 2 = 7.376 \text{ms}
+$$
+
+\part
+Full merge 情况下，需要拷贝所有页，并擦除块两次：
+$$
+    T_3 = 128 \times (0.025 + 0.080) + 2 \times 2 = 17.44\text{ms}
+$$
+
+\end{parts}
+
+\end{solution}

@@ -1,0 +1,24 @@
+\question {
+    现有一块 320GB 的 SLC SSD，它的擦写上限(P/E cycles)是 200,000 次。假设 SSD FTL 能
+    将写均匀分布在所有的闪存页上，每个写请求大小为 4KB，若以每秒发 300,000 个写请求的速率写，
+    请问多长时间这块 SSD 会被磨穿?
+}
+
+\begin{solution}
+
+闪存页数量为
+$$
+    320 \text{GB} / 4 \text{KB} \approx 80000000
+$$
+
+总共可被擦写次数为
+$$
+    80000000 \times 200000 \approx = 1.6 \times 10^{13}
+$$
+
+磨穿所需时间为
+$$
+    1.6 \times 10^{13} / 300000 \approx 53333333 \text{s}
+$$
+
+\end{solution}
