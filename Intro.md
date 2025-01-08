@@ -78,7 +78,7 @@ Linux 下，由**加载器**(Loader)完成：
     - 设置到初始状态
     - 跳转到 ROM 代码(BIOS)
     - 初始化启动所需最少的设备
-- 从持久存储加载Boot Loader•
+- 从持久存储加载Boot Loader
 - 跳转到 Boot Loader 执行
 - 加载 OS 其余的部分
 - 初始化 OS 并运行
